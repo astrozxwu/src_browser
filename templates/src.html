@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.css" />
+    <script type="text/javascript" src="../static/jq/jquery-1.10.2.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="../static/datatable/http_cdn.datatables.net_v_dt_jq-3.3.1_dt-1.10.23_fh-3.1.8_datatables.css" />
+    <script type="text/javascript"
+        src="../static/datatable/http_cdn.datatables.net_v_dt_jq-3.3.1_dt-1.10.23_fh-3.1.8_datatables.js"></script>
+    <link
+        href="../static/jq/__cdnjs.cloudflare.com_ajax_libs_x-editable_1.5.0_jqueryui-editable_css_jqueryui-editable.css"
+        rel="stylesheet" />
+    <script
+        src="../static/jq/__cdnjs.cloudflare.com_ajax_libs_x-editable_1.5.0_jqueryui-editable_js_jqueryui-editable.js"></script>
+
+
+    <script src="../static/highcharts/http_code.highcharts.com_highcharts.js"></script>
+    <script src="../static/highcharts/http_code.highcharts.com_modules_accessibility.js"></script>
+
+    <script src="../static/graph.js"></script>
+    <title>{{ src.Event }}</title>
+</head>
+<style>
+    body {
+        font-size: 14px !important;
+    }
+
+    input[type='text'] {
+        width: 100%;
+        text-align: center;
+        height: 100% !important;
+        -webkit-appearance: none;
+        padding: 0 !important;
+        border: 0 !important;
+        outline: none !important;
+        font: inherit !important;
+        background-color: inherit;
+
+    }
+
+    span.editable-container {
+        width: 100%;
+        vertical-align: middle !important;
+        align-items: center !important;
+    }
+
+    span.editable-clear-x {
+        padding: 0 !important;
+        height: 0 !important;
+        display: none !important;
+    }
+
+    span.editable-open {
+        padding: 0 !important;
+        height: 0 !important;
+    }
+
+    span.editable-container {
+        height: 90% !important;
+        padding: 0 !important;
+    }
+
+    td,
+    th {
+        align-items: center !important;
+        align-content: center;
+        align: middle;
+        text-align: center;
+        overflow: hidden;
+        height: 20px !important;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60%;
+        height: 70%;
+
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 70%;
+        left: 10%;
+        width: 40%;
+        bottom: 15%;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .absolute-center {
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+
+        align-items: center;
+        justify-content: center;
+    }
+
+    input:checked+.slider {
+        background-color: dimgrey;
+    }
+
+    input:focus+.slider {
+        box-shadow: 0 0 1px dimgray;
+    }
+
+    input:checked+.slider:before {
+        -webkit-transform: translateX(90%);
+        -ms-transform: translateX(90%);
+        transform: translateX(90%);
+    }
+
+
+
+    .fill {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden
+    }
+    .fill img {
+        flex-shrink: 0;
+        min-width: 100%;
+        min-height: 100%
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        const config = {
+            paging: false,
+            searching: false,
+            info: false,
+            sort: false
+        }
+        $('#tbldetail').DataTable(config);
+
+        $.fn.editable.defaults.mode = 'inline';
+
+        $('#tbldetail').editable({
+            showbuttons: false,
+            selector: 'span.Can',
+            url: '../update',
+            title: 'Can',
+            type: 'POST',
+            success: function (response, newValue) {
+                if (newValue === '1') {
+                    $('#tt').css('background-color', 'lawngreen')
+                    $('#tt').html("Status (active)")
+                } else {
+                    $('#tt').css('background-color', 'inherit');
+                    $('#tt').html("Status (inactive)")
+                }
+                ; //msg will be shown in editable form
+            }
+        });
+        $('#tbldetail').editable({
+            showbuttons: false,
+            selector: 'span.Comment',
+            url: '../update',
+            title: 'Comment',
+            type: 'POST',
+        });
+        $('#tbldetail').editable({
+            showbuttons: false,
+            selector: 'span.t0',
+            url: '../update',
+            title: 't0',
+            type: 'POST',
+        });
+        $('#tbldetail').editable({
+            showbuttons: false,
+            selector: 'span.tE',
+            url: '../update',
+            title: 'tE',
+            type: 'POST',
+        });
+        $('#tbldetail').editable({
+            showbuttons: false,
+            selector: 'span.Kmag',
+            url: '../update',
+            title: 'Kmag',
+            type: 'POST',
+        });
+
+        $('#tbldetail').editable({
+            showbuttons: false,
+            selector: 'span.r_K',
+            url: '../update',
+            title: 'r_K',
+            type: 'POST',
+        });
+    });
+    $(document).on('submit', '#sendu0', function (e) {
+        e.preventDefault();
+        series = $(chart_id).highcharts().series;
+        $.ajax({
+            type: 'POST',
+            url: '../fitparm',
+            data: {
+                u0: $("#u0").val(),
+                event_name: "{{ src.Event }}",
+                bl: $("#bl").val(),
+                t0: "{{ src.t0 }}",
+                tE: "{{ src.tE }}"
+            },
+            success: function (response) {
+                $("#fittab_wrapper").html(response);
+            },
+        })
+    });
+</script>
+
+<body>
+    <div style="padding-left:0px; padding-right:0px;">
+        <div style="background-color:#EEE;padding:10px;">
+            &lt;&lt;&lt;
+            <a href="../">Event List</a>
+            &lt;&lt;&lt;
+            <a href="../src/{{ prev }}">Previous</a>
+            &lt;&lt;&lt;
+            <a href="../src/{{ next }}">Next</a>
+            &lt;&lt;&lt;
+        </div>
+    </div>
+    <div id="leftpanel" style="width: 50%; float: left;">
+        <div id={{ chartID|safe }} class="chart" style=" width: 100%"></div>
+        <script>
+            var chart_id =
+                {{chartID| safe }}
+            var series =
+                {{series| safe }}
+            var title =
+                {{title| safe }}
+            var chart =
+                {{chart| safe }}
+            var models =
+                {{models| safe }}
+        </script>
+        <div id="fittab_wrapper" class="dataTables_wrapper no-footer">
+            {% include 'fitform.html' %}
+        </div>
+        <script>
+            function loadmodel(e) {
+                let u0 = e.id
+                m = models.filter(x => x['name'] === u0)[0]
+                idx = $(chart_id).highcharts().series.findIndex(x => x['name'] === u0)
+                if (e.checked) {
+                    if (idx === -1) {
+                        $(chart_id).highcharts().addSeries(m)
+                    }
+                } else {
+                    $(chart_id).highcharts().series[idx].remove()
+                }
+            }
+        </script>
+        <div class="dataTables_wrapper no-footer">
+            <table class="dataTable no-footer">
+                <tr>
+                    <form id="sendu0" method="post">
+                        <td style="width: 30%;">
+                            <input style="text-align:center;height: 100%;width:100%;padding: 0 !important;font: inherit !important;
+" placeholder="fixed u0" id="u0" name="u0" />
+                        </td>
+                        <td style="width: 30%;">
+                            <input style="text-align:center;height: 100%;width:100%;padding: 0 !important;font: inherit !important;
+" placeholder="blending? " id="bl" name="bl" value="0" />
+                        </td>
+                        <td style="width: 30%;">
+                            <button style="width:100%;height:100%;margin:0;padding: 0;font: inherit !important;"
+                                type="submit">fit
+                            </button>
+                        </td>
+                    </form>
+                </tr>
+            </table>
+        </div>
+        <div>
+        <img  style='height: 100%; width: 100%; object-fit: contain' src="../data/{{ src.Event }}/{{ src.Event }}_LC.png">
+        </div>
+    </div>
+    <div id="rightpanel" style="width: 49%; float: right;background-color: #EEE">
+        <div style="padding:10px;">
+            <div id='tt' style="font-size:20px; font-weight:bold; background-color:{{ " lawngreen" if src.Status == 1 }};">
+                Status ({{ "active" if src.Status == 1 else "inactive" }})
+            </div>
+
+            <div id="tbldetail_wrapper" class="dataTables_wrapper no-footer">
+                <table id="tbldetail" class="display dataTable no-footer" role="grid">
+                    <thead>
+                        <tr role="row">
+                            <th rowspan="1" colspan="1">Property</th>
+                            <th rowspan="1" colspan="1">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Event</td>
+                            <td>{{ src.Event }}</td>
+                        </tr>
+                        <tr>
+                            <td>PubDate</td>
+                            <td>{{ src.PubDate }}</td>
+                        </tr>
+                        <tr>
+                            <td>RA&nbsp;&nbsp;Dec</td>
+                            <td>{{ src.RA }}&nbsp;&nbsp;{{ src.Dec }}</td>
+                        </tr>
+                        <tr>
+                            <td>l&nbsp;&nbsp;b</td>
+                                {% set l,b = lb(src.RA,src.Dec) %}
+                            <td>{{ "%.5f"|format(l|float) }}&nbsp;&nbsp;{{ "%.5f"|format(b|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>t0</td>
+                            <td><span data-name="t0" class="t0" data-type="text" data-pk="{{ src.id }}">{{
+                                    "%.2f"|format(src.t0|float) }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>tE</td>
+                            <td><span data-name="tE" class="tE" data-type="text" data-pk="{{ src.id }}">{{
+                                    "%.2f"|format(src.tE|float) }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>gbase</td>
+                            <td>{{ "%.2f"|format(src.gbase|float) }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>rbase</td>
+                            <td>{{ "%.2f"|format(src.rbase|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>ibase</td>
+                            <td>{{ "%.2f"|format(src.ibase|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Kest</td>
+                            <td>{{ "%.2f"|format(src.Kest|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Kbase</td>
+                            <td><span data-name="Kmag" class="Kmag" data-type="text" data-pk="{{ src.id }}">{{ "%.2f"|format(src.Kmag|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>r_K</td>
+                            <td><span data-name="r_K" class="r_K" data-type="text" data-pk="{{ src.id }}">{{ "%.2f"|format(src.r_K|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Gbase</td>
+                            <td>{{ "%.2f"|format(src.Gmag|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>G_FT</td>
+                            <td>{{ "%.2f"|format(src.G_FT|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>K_FT</td>
+                            <td>{{ "%.2f"|format(src.K_FT|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>r_FT</td>
+                            <td>{{ "%.2f"|format(src.r_FT|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>G_AO</td>
+                            <td>{{ "%.2f"|format(src.G_AO|float) }}</td>
+                        </tr>
+                        <tr>
+                            <td>r_AO</td>
+                            <td>{{ "%.2f"|format(src.r_AO|float) }}</td>
+                        </tr>
+                        </tr>
+                        {% for key in ['Can','Comment'] %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td><span data-name="{{ key }}" class="{{ key }}" data-type="text" data-pk="{{ src.id }}">{{
+                                    src[key] }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td>links</td>
+                            <td>
+                                <a href="http://gsaweb.ast.cam.ac.uk/alerts/alert/{{ src.Event }}"
+                                    target="_blank">Gaia</a>&nbsp;&nbsp;
+                                {% set ra,dec = h2d(src.RA,src.Dec) %}
+                                <a href="https://irsa.ipac.caltech.edu/applications/finderchart/?__action=table.search&request=%7B%22startIdx%22%3A0%2C%22pageSize%22%3A100%2C%22id%22%3A%22QueryFinderChartWeb%22%2C%22tbl_id%22%3A%22upload-table-id%22%2C%22UserTargetWorldPt%22%3A%22{{ ra }}%3B{{ dec }}555555556%3BEQ_J2000%22%2C%22imageSizeAndUnit%22%3A%220.08333333333333333%22%2C%22thumbnail_size%22%3A%22192%22%2C%22selectImage%22%3A%222mass%22%2C%22searchCatalog%22%3A%22yes%22%2C%22searchType%22%3A%22radiusInArcSec%22%2C%22tx2MASS%22%3A%225%22%2C%22ckg2MASS%22%3A%22k%22%2C%22imageSearchOptions%22%3A%22open%22%2C%22META_INFO%22%3A%7B%22title%22%3A%22QueryFinderChartWeb%22%2C%22tbl_id%22%3A%22upload-table-id%22%7D%7D&options=%7B%22tbl_group%22%3A%22upload-table-id%22%2C%22removable%22%3Afalse%2C%22showTitle%22%3Afalse%2C%22pageSize%22%3A100%7D"
+                                    target="_blank">2mass</a>&nbsp;&nbsp;
+                                <a href="https://api.skymapper.nci.org.au/public/siap/dr2/query?POS={{ ra }}%2C{{ dec }}&SIZE=0.1&FORMAT=GRAPHIC"
+                                    target="_blank">SM</a>&nbsp;&nbsp;
+                                <a href="http://ps1images.stsci.edu/cgi-bin/ps1cutouts?pos={{ ra }}%2C{{ dec }}&filter=color"
+                                    target="_blank">PS1</a>&nbsp;&nbsp;
+                                <a href="https://www.wis-tns.org/object/{{ src.TNS }}" target="_blank">TNS</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>tags</td>
+                            <td>
+                                {% include 'tags.html' %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+        <img style='height: 100%; width: 100%; object-fit: contain' src="../data/{{ src.Event }}/{{ src.Event }}_HR.png">
+        </div>
+        <div>
+        <img style='height: 100%; width: 100%; object-fit: contain' src="../data/{{ src.Event }}/{{ src.Event }}_HRcorr.png">
+        </div>
+        <div> 
+        <input id="2MASS" type="radio" name="survey" value="P/2MASS/color" checked><label for="2MASS">2MASS<label>
+        <input id="dec" type="radio" name="survey" value="P/DECaPS/DR1/color"><label for="dec">DECAM<label>
+        <input id="ps" type="radio" name="survey" value="P/PanSTARRS/DR1/color/z/zg/g"><label for="ps">PS1<label>
+        </div>
+        <div class='absolute-center'> 
+        <div id="aladin-lite-div" style="width:600px ;height:600px ;"></div>
+        <script type="text/javascript" src="https://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script>
+        <script type="text/javascript">
+            var aladin = A.aladin('#aladin-lite-div', {survey: "P/2MASS/color", fov:0.1, target: "{{src.RA}} {{src.Dec}}"});
+            var ss = A.marker({{ ra }} , {{ dec }} , {popupTitle: "{{ src.Event }}"  });
+            var markerLayer = A.catalog();
+            var overlay = A.graphicOverlay({lineWidth: 1});
+            aladin.addOverlay(overlay);
+            overlay.add(A.circle({{ ra }}, {{ dec }}, 0.00833333, {color: 'lime',lineWidth: 3})); // radius in degrees
+            overlay.add(A.circle({{ ra }}, {{ dec }}, 0.01666667, {color: 'lime',lineWidth: 3})); // radius in degrees
+            aladin.addCatalog(markerLayer);
+            markerLayer.addSources([ss]);
+            $('input[name=survey]').change(function() {
+                aladin.setImageSurvey($(this).val());
+            });
+
+        </script>
+        </div>
+        </div>
+
+</body>
+
+</html>

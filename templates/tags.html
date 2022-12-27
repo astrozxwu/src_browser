@@ -1,0 +1,71 @@
+<style>
+
+    .tag {
+        display: inline-block;
+        height: 70%;
+    }
+
+    /* Hide default HTML checkbox */
+    .tag input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* The slider */
+    .tagg {
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+        user-select: none; /* Standard */
+        cursor: pointer;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border: 2px solid gray;
+        background-color: #ffffff;
+        text-align: center;
+        font-family: 'Source Sans Pro', sans-serif;
+        font-size: 14px;
+        color: gray;
+        padding: 4px;
+    }
+
+    .tagg:before {
+        position: absolute;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked + .tagg {
+        background-color: gray;
+        color: white;
+    }
+
+    input:focus + .tagg {
+        box-shadow: 0 0 1px dimgray;
+    }
+</style>
+
+{% for t in tags %}
+    <label class="tag" id="{{ t }}">
+        {% if tags[t] == 1 %}
+        <input type="checkbox" checked>
+        {% else %}
+        <input type="checkbox">
+        {% endif %}
+        <span class="tagg">{{ t }}</span>
+    </label>
+    <script>
+        $(document).on('change', '#{{ t }}', function (e) {
+            $.ajax({
+                type: 'POST',
+                url: '../updatetags',
+                data: {
+                    checked: $("#{{ t }} input").is(":checked"),
+                    tag: $("#{{ t }} span.tagg").text(),
+                    pk: {{ src.id }}
+                },
+            });
+        });
+    </script>
+{% endfor %}

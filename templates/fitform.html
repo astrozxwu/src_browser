@@ -1,0 +1,49 @@
+<table id="fittab" class="dataTable no-footer">
+    <thead>
+        <tr>
+            <th style="width: 15%">u0</th>
+            <th style="width: 15%">t0</th>
+            <th style="width: 15%">tE</th>
+            <th style="width: 15%;">Is</th>
+            <th style="width: 15%;">Ib</th>
+            <th style="width: 15%;">chi2</th>
+            <th style="width: 10%;">display</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for fit in pars %}
+        <tr>
+            <td>{{ "%.3f"|format(fit.u0|float) }}</td>
+            <td>{{ "%.2f"|format(fit.t0|float) }}</td>
+            <td>{{ "%.2f"|format(fit.tE|float) }}</td>
+            <td>{{ "%.2f"|format(fit.Is|float) }}</td>
+            <td>{{ "%.2f"|format(fit.Ib|float) }}</td>
+            <td>{{ "%.2f"|format(fit.chi2|float) }}</td>
+            <td style="padding: 0;"><label class="switch"><input id="{{ fit.name }}"
+                        type="checkbox" onclick='loadmodel(this)'><span class="slider"></span></label></td>
+        </tr>
+
+        {% endfor %}
+    </tbody>
+    <script>
+        var fit_info = '{{ fit_info|safe }}'
+        if (fit_info != 'success') {
+            alert(fit_info);
+        };
+        var models = {{models| safe }}
+        $('#fittab').DataTable({
+            paging: false,
+            searching: false,
+            info: false,
+            order: [[5, 'asc']],
+            columnDefs: [{targets: 5}],
+        });
+        {% for fit in pars %}
+        var name = "{{ fit.name }}"
+        idx = series.findIndex(x => x['name'] === name);
+        if (idx !== -1) {
+            $('#' + name.replace('.', '\\.')).prop('checked', true);
+        }
+        {% endfor %}
+    </script>
+</table>

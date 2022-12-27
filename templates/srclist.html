@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="./static/jq/jquery-1.10.2.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="./static/datatable/http_cdn.datatables.net_v_dt_jq-3.3.1_dt-1.10.23_fh-3.1.8_datatables.css" />
+    <script type="text/javascript"
+        src="./static/datatable/http_cdn.datatables.net_v_dt_jq-3.3.1_dt-1.10.23_fh-3.1.8_datatables.js"></script>
+    <link
+        href="./static/jq/__cdnjs.cloudflare.com_ajax_libs_x-editable_1.5.0_jqueryui-editable_css_jqueryui-editable.css"
+        rel="stylesheet" />
+    <script
+        src="./static/jq/__cdnjs.cloudflare.com_ajax_libs_x-editable_1.5.0_jqueryui-editable_js_jqueryui-editable.js"></script>
+
+
+    <script src="./static/highcharts/http_code.highcharts.com_highcharts.js"></script>
+    <script src="./static/highcharts/http_code.highcharts.com_modules_accessibility.js"></script>
+
+    <title>microlensing src browse servise</title>
+</head>
+<style>
+    body {
+        font-size: 14px !important;
+    }
+
+    input[type='text'] {
+        width: 100%;
+        height: 100% !important;
+        -webkit-appearance: none;
+        padding: 0 !important;
+        border: 0 !important;
+        outline: none !important;
+        text-align: center;
+        font: inherit !important;
+        background-color: inherit;
+    }
+
+    span.editable-container {
+        vertical-align: middle !important;
+        align-items: center !important;
+        display: table-cell !important;
+
+    }
+
+    span.editable-clear-x {
+        padding: 0 !important;
+        height: 0 !important;
+        display: none !important;
+    }
+
+    span.editable-open {
+        padding: 0 !important;
+        height: 0 !important;
+    }
+
+    span.editable-container {
+        height: 90% !important;
+        padding: 0 !important;
+    }
+
+    td,
+    th {
+        text-align: center !important;
+        vertical-align: middle;
+        height: 20px !important;
+        background-color: inherit !important;
+    }
+
+    .text-wrap {
+        white-space: normal;
+        text-align: center !important;
+    }
+
+    .width-200 {
+        text-align: center !important;
+        max-width: 250px;
+        word-wrap: break-word;
+    }
+
+    table {
+        border-collapse: collapse !important;
+        border-spacing: 0 !important;
+    }
+</style>
+
+<body>
+    <script>
+        $(document).on('submit', '#queryform', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: './query',
+                data: {
+                    query: $("#query").val(),
+                    indexes: JSON.stringify(ids),
+                },
+                success: function (response) {
+                    $("#table_wrapper").html(response);
+                },
+            })
+        });
+        var today = new Date();
+        var julday = Math.floor((today.valueOf() / (1000 * 60 * 60 * 24)) - 0.5) + 2440588;
+    </script>
+    <div style="text-align: center;">
+        <h1 class="title">src-broswer &nbsp;&nbsp; today:
+            <script type="text/javascript">
+                document.write(julday)
+            </script>
+        </h1>
+    </div>
+    <div style="text-align: center;">
+        <h2 class="title">(interactive model fitting & sql filtering)</h2>
+    </div>
+
+    <div style="text-align: left;">
+        <p><b>UT_wide: </b>number of FT stars with G_FT &#60; 15 and K_FT &#60; 11</p>
+        <p><b>AT_wide: </b>number of FT stars with G_FT &#60; 13 and K_FT &#60; 9</p>
+    </div>
+    <div class="dataTables_wrapper no-footer">
+        <table class="dataTable no-footer">
+            <tr>
+                {% for t in tags %}
+                <td style="padding-left: 0!important;padding-right: 0 !important">
+                    <label class="tag" id="{{ t }}">
+                        <input type="checkbox">
+                        <span class="tagg">{{ t }}</span>
+                    </label>
+                </td>
+                <script>
+                    $(document).on('change', '#{{ t }}', function (e) {
+                        if ($("#{{ t }} input").is(':checked')) {
+                            $.ajax({
+                                type: 'POST',
+                                url: './query',
+                                data: {
+                                    {% if t == 'Ongoing' %}
+                                        query: "Status > 0",
+                                    {% else %}
+                                        query: "{{ t }} > 0",
+                                    {% endif %}
+                                    indexes: JSON.stringify(ids),
+                                },
+                                success: function (response) {
+                                    $("#table_wrapper").html(response);
+                                },
+                            })
+                        } else {
+                            $.ajax({
+                                type: 'POST',
+                                url: './query',
+                                data: {
+                                    query: "",
+                                    indexes: "",
+                                },
+                                success: function (response) {
+                                    $("#table_wrapper").html(response);
+                                },
+                            })
+                        }
+                    });
+                </script>
+                {% endfor %}
+                <td style="padding-left: 0;padding-right: 0">
+                    <label class="tag" id="can">
+                        <input type="checkbox">
+                        <span class="tagg">can=1</span>
+                    </label>
+                </td>
+                <script>
+                    $(document).on('change', '#can', function (e) {
+                        if ($("#can input").is(':checked')) {
+                            $.ajax({
+                                type: 'POST',
+                                url: './query',
+                                data: {
+                                    query: " can=1",
+                                    indexes: JSON.stringify(ids),
+                                },
+                                success: function (response) {
+                                    $("#table_wrapper").html(response);
+                                },
+                            })
+                        } else {
+                            $.ajax({
+                                type: 'POST',
+                                url: './query',
+                                data: {
+                                    query: "",
+                                    indexes: "",
+                                },
+                                success: function (response) {
+                                    $("#table_wrapper").html(response);
+                                },
+                            })
+                        }
+                    });
+                </script>
+                    <td style="padding-top: 0;padding-bottom: 0">
+                        <button id='all' style="width:100%;height:80%;margin:0;padding: 0;font: inherit !important;"
+                            type="submit">show all
+                        </button>
+                    </td>
+                <script>
+                    $(document).on('click', '#all', function (e) {
+                            $.ajax({
+                                type: 'POST',
+                                url: './query',
+                                data: {
+                                    query: "",
+                                    indexes: "",
+                                },
+                                success: function (response) {
+                                    $("#table_wrapper").html(response);
+                                },
+                            })
+                    });
+                </script>
+
+                <form id="queryform" method="post">
+                    <td style="width: 50%;padding-top: 0;padding-bottom: 0">
+                        <input style="text-align:center;height: 70%;width:100%;padding: 0 !important;font: inherit !important;
+" placeholder="sql query here..." id="query" name="query" />
+                    </td>
+                    <td style="width: 20%;padding-top: 0;padding-bottom: 0">
+                        <button style="width:100%;height:70%;margin:0;padding: 0;font: inherit !important;"
+                            type="submit">
+                            query
+                        </button>
+                    </td>
+                </form>
+
+
+            </tr>
+        </table>
+        <style>
+            .tag {
+                display: inline-block;
+                height: 70%;
+            }
+
+            /* Hide default HTML checkbox */
+            .tag input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            /* The slider */
+            .tagg {
+                -webkit-user-select: none;
+                /* Safari */
+                -moz-user-select: none;
+                /* Firefox */
+                -ms-user-select: none;
+                /* IE10+/Edge */
+                user-select: none;
+                /* Standard */
+                cursor: pointer;
+                -webkit-transition: .4s;
+                transition: .4s;
+                border: 2px solid gray;
+                background-color: #ffffff;
+                text-align: center;
+                font-family: 'Source Sans Pro', sans-serif;
+                font-size: 14px;
+                color: gray;
+                padding: 4px;
+            }
+
+            .tagg:before {
+                position: absolute;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+
+            input:checked+.tagg {
+                background-color: gray;
+                color: white;
+            }
+
+            input:focus+.tagg {
+                box-shadow: 0 0 1px dimgray;
+            }
+        </style>
+    </div>
+    <div id="table_wrapper" class="dataTables_wrapper no-footer">
+        {% include "table.html" %}
+    </div>
+</body>
+
+</html>

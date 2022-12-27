@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login Page</title>
+  </head>
+  <body>
+    <form id="login" onsubmit="return login()">
+      <h1>LOGIN</h1>
+      <input type="text" name="email" placeholder='username' required />
+      <input type="password" placeholder="Password" name="password" required />
+      <input type="submit" value="Sign In"/>
+    </form>
+  </body>
+<script>
+    function login () {
+  // (A) GET EMAIL + PASSWORD
+  var data = new FormData(document.getElementById("login"));
+
+  // (B) AJAX REQUEST
+  fetch("/lin", { method:"POST", body:data })
+  .then((res) => { return res.text(); })
+  .then((txt) => {
+    if (txt=="OK") { location.href = "../srclist"; }
+    else { alert(txt); }
+  })
+  .catch((err) => {
+    alert("Server error - " + err.message);
+    console.error(err);
+  });
+  return false;
+}
+</script>
+</html>
+

@@ -1,0 +1,149 @@
+<table cellspacing="0" id="srctab" class="display no-spacing" width="100%">
+    <thead>
+        <tr>
+            <th>Event</th>
+            <th>Status</th>
+            <th>Can</th>
+            <th>RA Dec</th>
+            <th>t0</th>
+            <th>tE</th>
+            <th>Kbase</th>
+            <th>Gbase</th>
+            <th>G_FT</th>
+            <th>K_FT</th>
+            <th>r_FT</th>
+            <th>AT_wide</th>
+            <th>UT_wide</th>
+            <th>AT</th>
+            <th>UT</th>
+            <th>Last modified</th>
+            <th>Comment</th>
+        </tr>
+    </thead>
+    <script>
+        var ids = [];
+    </script>
+    <tbody>
+        {% for row,md in zip(data,mdtime) %}
+        <script>
+            ids.push({{row.id}})
+        </script>
+        <tr>
+            <td><a href="./src/{{ row.Event }}" target="_blank">{{ row.Event }}</a></td>
+            <td><span data-name="stat" class="stat" data-type="text" data-pk="{{ row.id }}">{{ row.Status}}</span>
+            </td>
+            <td><span data-name="Can" class="Can" data-type="text" data-pk="{{ row.id }}">{{ row.Can }}</span>
+            </td>
+            <td>{{ row.RA }} &nbsp;&nbsp; {{row.Dec}}</td>
+            <td>{{ "%.2f"|format(row.t0|float) }}</td>
+            <td>{{ "%.2f"|format(row.tE|float) }}</td>
+            <td>{{ "%.2f"|format(row.Kmag|float) }}</td>
+            <td>{{ "%.2f"|format(row.Gmag|float) }}</td>
+            <td>{{ "%.2f"|format(row.G_FT|float) }}</td>
+            <td>{{ "%.2f"|format(row.K_FT|float) }}</td>
+            <td>{{ "%.1f"|format(row.r_FT|float) }}</td>
+            <td>{{ row.AT_wide}}</td>
+            <td>{{ row.UT_wide}}</td>
+            <td>{{ row.AT}}</td>
+            <td>{{ row.UT}}</td>
+            <td>{{ md }}</td>
+            <td><span data-name="Comment" class="Comment" data-type="text" data-pk="{{ row.id }}">{{ row.Comment
+                    }}</span></td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+    <script>
+        jQuery.fn.dataTableExt.oSort['can-pre'] = function (x) {
+            return Math.abs(parseFloat(String(x).replace(/\<.*?\>/g, "")) - 1.1)
+        };
+        jQuery.fn.dataTableExt.oSort['md-pre'] = function (x) {
+            let base = 0;
+            x = String(x).replace(/\<.*?\>/g, "")
+            if (x.includes('second')){
+                base = 1
+            }
+            if (x.includes('minute')){
+                base = 100
+            }
+            if (x.includes('hour')){
+                base = 200
+            }
+            if (x.includes('day')){
+                base = 300
+            }
+            if (x.includes('week')){
+                base = 400 
+            }
+            if (x.includes('month')){
+                base = 500 
+            }
+            if (x.includes('year')){
+                base = 600 
+            }
+            let r = /\d+/;
+            return -base - parseInt(x.match(r)[0]) 
+        };
+        var color_ = ['#ABEBC6', '#AED6F1', '#4D5656', '#566573']
+        var config = {
+            paging: true,
+            fixedHeader: true,
+            iDisplayLength: 50,
+            order: [[2, 'asc'], [15, 'desc']],
+            columnDefs: [{targets: 2, type: 'can'}, {targets: 15,type:'md'},
+            {
+                render: function (data, type, full, meta) {
+                    return "<div class='text-wrap width-200'>" + data + "</div>";
+                },
+                targets: 16
+            }
+            ],
+            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                if (aData[2].split('<')[1].split('>')[1] === "1" && aData[1].split('<')[1].split('>')[1] === "1") {
+                    $(nRow).css('background-color', color_[0]);
+                    //                } else if (aData[1].split('<')[1].split('>')[1] === "2") {
+                    //                    $(nRow).css('background-color', color_[1]);
+                } else if (aData[2].split('<')[1].split('>')[1] === "0") {
+                    $(nRow).css('background-color', color_[2]);
+                }
+            }
+        };
+        $('#srctab').DataTable(config);
+        $.fn.editable.defaults.mode = 'inline';
+
+        $('#srctab').editable({
+            container: 'body',
+            showbuttons: false,
+            selector: 'span.Can',
+            url: './update',
+            title: 'Can',
+            type: 'POST',
+            success: function (response, newValue) {
+                if (newValue === '1') {
+                    $(this.parentElement.parentElement).css('background-color', color_[0])
+                    //                } else if (newValue === '2') {
+                    //                    $(this.parentElement.parentElement).css('background-color', color_[1])
+                } else if (newValue === '0') {
+                    $(this.parentElement.parentElement).css('background-color', color_[2])
+                }
+                ; //msg will be shown in editable form
+            }
+        });
+        $('#srctab').editable({
+            container: 'body',
+            showbuttons: false,
+            selector: 'span.stat',
+            url: './update',
+            title: 'Status',
+            type: 'POST',
+        });
+        $('#srctab').editable({
+            container: 'body',
+            showbuttons: false,
+            selector: 'span.Comment',
+            url: './update',
+            title: 'Comment',
+            type: 'POST',
+        });
+    </script>
+</table>
