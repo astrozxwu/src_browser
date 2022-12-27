@@ -1,8 +1,8 @@
-# from astroquery.vizier import Vizier
+from astroquery.vizier import Vizier
 import astropy.coordinates as coord
 import astropy.units as u
 from astropy.table import Table
-# from astroquery.xmatch import XMatch
+from astroquery.xmatch import XMatch
 import numpy as np
 
 keys = ['Event','PubDate','TNS','RA','Dec','l','b','t0','u0','tE','Kest','Gmag','Kmag','r_K','gbase','rbase','ibase','G_FT','K_FT','r_FT','G_AO','r_AO','AT','UT','AT_wide','UT_wide','Can','Status','Comment','Tags']
