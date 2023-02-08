@@ -10,4 +10,6 @@ reload = True
 data_path = "/data/www/vlti/data"
 src_path = "/data/www/vlti"
 db_path = "/data/www/vlti/data/db.sqlite"
-tags = ["AT", "UT", "AT_wide", "UT_wide", "Ongoing"]
+key_tags = ["AT", "UT", "AT_wide", "UT_wide"]
+map_tags = {"Ongoing":"Status"}
+idle_tags = []

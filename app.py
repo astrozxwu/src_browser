@@ -7,7 +7,6 @@ import config
 import tableproc as tp
 import numpy as np
 import fit
-import fdata
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{config.db_path}"
@@ -36,9 +35,14 @@ lll = len(Src.query.all())
 def srclist():
     data = db.engine.execute("SELECT * FROM Src where Status = 1;")
     Events = [i["Event"] for i in data]
-    mdtime = fdata.getmdtime(Events)
+    mdtime = fit.getmdtime(Events)
     data = db.engine.execute("SELECT * FROM Src where Status = 1;")
-    return render_template("srclist.html", data=data, tags=config.tags, mdtime=mdtime)
+    return render_template(
+        "srclist.html",
+        data=data,
+        tags=config.key_tags + config.idle_tags,
+        mdtime=mdtime,
+    )
 
 
 @app.route("/query", methods=["POST"])
@@ -58,7 +62,7 @@ def query():
     print(query)
     data = db.engine.execute(sql)
     Events = [i["Event"] for i in data]
-    mdtime = fdata.getmdtime(Events)
+    mdtime = fit.getmdtime(Events)
     data = db.engine.execute(sql)
     return render_template("table.html", data=data, mdtime=mdtime)
 
@@ -94,15 +98,13 @@ def src(Event, chartID="chart_ID"):
     next = Src.query.filter(Src.id.ilike(f"%{id_next}%"))[0].to_dict()["Event"]
     pageType = "graph"
     chart = {"renderTo": chartID, "zoomType": "xy", "height": "100%"}
-    series = fdata.getdata(event_name)
+    series = fit.getdata(event_name)
     title = {"text": event_name}
     pars, models = fit.loadfit(event_name)
-    tg = {i: 0 for i in config.tags}
-    for i in config.tags:
-        if i == "Ongoing":
-            tg[i] = 1 * (x["Status"] > 0)
-        else:
-            tg[i] = 1 * (x[i] > 0)
+    key_tg = {i: 1 * (x[i] > 0) for i in config.key_tags}
+    idle_tg = {i: 1 * (i in x["tags"]) for i in config.idle_tags}
+    map_tg = {i: 1 * (x[config.map_tags[i]] > 0) for i in config.map_tags.keys()}
+    tg = {**key_tg, **idle_tg, **map_tg}
     return render_template(
         "src.html",
         pageType=pageType,
@@ -144,30 +146,35 @@ def updatetags():
     query = Src.query.filter(Src.id.ilike(f"%{pk}%"))
     x = query[0].to_dict()["Tags"]
     if not checked:
-        x = x.replace(tag, "")
-        db.engine.execute(
-            "UPDATE Src SET {} = '{}' WHERE id = {} ".format("Tags", x, pk)
-        )
-        if tag in ["AT;", "UT;", "AT_wide;", "UT_wide;"]:
+        if tag[:-1] in config.idle_tags:
+            x = x.replace(tag, "")
+            db.engine.execute(
+                "UPDATE Src SET {} = '{}' WHERE id = {} ".format("Tags", x, pk)
+            )
+        if tag[:-1] in config.key_tags:
             db.engine.execute(
                 "UPDATE Src SET {} = 0 WHERE id = {} ".format(tag[:-1], pk)
             )
-        if tag == "Ongoing;":
-            db.engine.execute("UPDATE Src SET Status = 0 WHERE id = {} ".format(pk))
+        if tag[:-1] in config.map_tags.keys():
+            real_key = config.map_tags.keys()[tag[:-1]]
+            db.engine.execute(
+                "UPDATE Src SET {} = 0 WHERE id = {} ".format(real_key, pk)
+            )
     else:
-        x += tag
-        db.engine.execute(
-            "UPDATE Src SET {} = '{}' WHERE id = {} ".format("Tags", x, pk)
-        )
-        if tag == "Not-ulens;":
-            db.engine.execute("UPDATE Src SET Can = 0 WHERE id = {} ".format(pk))
-        if tag == "Ongoing;":
-            db.engine.execute("UPDATE Src SET Status = 1 WHERE id = {} ".format(pk))
-        if tag in ["AT;", "UT;", "AT_wide;", "UT_wide;"]:
+        if tag[:-1] in config.idle_tags:
+            x += tag
+            db.engine.execute(
+                "UPDATE Src SET {} = '{}' WHERE id = {} ".format("Tags", x, pk)
+            )
+        if tag[:-1] in config.map_tags.keys():
+            real_key = config.map_tags.keys()[tag[:-1]]
+            db.engine.execute(
+                "UPDATE Src SET {} = 1 WHERE id = {} ".format(real_key, pk)
+            )
+        if tag[:-1] in config.key_tags:
             db.engine.execute(
                 "UPDATE Src SET {} = 1 WHERE id = {} ".format(tag[:-1], pk)
             )
-
     return json.dumps({"status": "OK"})
 
 
