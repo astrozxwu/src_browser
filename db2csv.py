@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 
 
 def loadcsv2db(fname, dbname):
-    # create new database using csnv.csv
+    # create new database using *.csv
     # fail if there exist old database
     try:
         engine = create_engine(f"sqlite:///{dbname}")
@@ -27,6 +27,7 @@ def appendcsv2db(fname, dbname):
     with engine.begin() as connection:
         tab = connection.execute("select event from src")
         tab = [i["Event"] for i in tab]
+        # ignore if database contain events
         df = df[~df.Event.isin(tab)]
         df.index += len(tab)
         df.to_sql("src", con=connection, index_label="id", if_exists="append")

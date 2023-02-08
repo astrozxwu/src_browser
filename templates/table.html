@@ -5,15 +5,16 @@
             <th>Status</th>
             <th>Can</th>
             <th>RA Dec</th>
-            <th>t0</th>
-            <th>tE</th>
+            <!-- <th>t0</th> -->
+            <!-- <th>tE</th> -->
+            <th>PubDate</th>
             <th>Kbase</th>
             <th>Gbase</th>
             <th>G_FT</th>
             <th>K_FT</th>
             <th>r_FT</th>
-            <th>AT_wide</th>
-            <th>UT_wide</th>
+            <th>AT_w</th>
+            <th>UT_w</th>
             <th>AT</th>
             <th>UT</th>
             <th>Last modified</th>
@@ -35,8 +36,9 @@
             <td><span data-name="Can" class="Can" data-type="text" data-pk="{{ row.id }}">{{ row.Can }}</span>
             </td>
             <td>{{ row.RA }} &nbsp;&nbsp; {{row.Dec}}</td>
-            <td>{{ "%.2f"|format(row.t0|float) }}</td>
-            <td>{{ "%.2f"|format(row.tE|float) }}</td>
+            <!-- <td>{{ "%.2f"|format(row.t0|float) }}</td> -->
+            <!-- <td>{{ "%.2f"|format(row.tE|float) }}</td> -->
+            <td>{{ row.PubDate[:10] }}</td>
             <td>{{ "%.2f"|format(row.Kmag|float) }}</td>
             <td>{{ "%.2f"|format(row.Gmag|float) }}</td>
             <td>{{ "%.2f"|format(row.G_FT|float) }}</td>
@@ -60,42 +62,42 @@
         jQuery.fn.dataTableExt.oSort['md-pre'] = function (x) {
             let base = 0;
             x = String(x).replace(/\<.*?\>/g, "")
-            if (x.includes('second')){
+            if (x.includes('second')) {
                 base = 1
             }
-            if (x.includes('minute')){
+            if (x.includes('minute')) {
                 base = 100
             }
-            if (x.includes('hour')){
+            if (x.includes('hour')) {
                 base = 200
             }
-            if (x.includes('day')){
+            if (x.includes('day')) {
                 base = 300
             }
-            if (x.includes('week')){
-                base = 400 
+            if (x.includes('week')) {
+                base = 400
             }
-            if (x.includes('month')){
-                base = 500 
+            if (x.includes('month')) {
+                base = 500
             }
-            if (x.includes('year')){
-                base = 600 
+            if (x.includes('year')) {
+                base = 600
             }
             let r = /\d+/;
-            return -base - parseInt(x.match(r)[0]) 
+            return -base - parseInt(x.match(r)[0])
         };
         var color_ = ['#ABEBC6', '#AED6F1', '#4D5656', '#566573']
         var config = {
             paging: true,
             fixedHeader: true,
             iDisplayLength: 50,
-            order: [[2, 'asc'], [15, 'desc']],
-            columnDefs: [{targets: 2, type: 'can'}, {targets: 15,type:'md'},
+            order: [[2, 'asc'], [14, 'desc']],
+            columnDefs: [{targets: 2, type: 'can'}, {targets: 14, type: 'md'},
             {
                 render: function (data, type, full, meta) {
                     return "<div class='text-wrap width-200'>" + data + "</div>";
                 },
-                targets: 16
+                targets: 15
             }
             ],
             "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
