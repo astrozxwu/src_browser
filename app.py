@@ -1,13 +1,13 @@
 import json
-import os
 
 from flask import Flask, render_template, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 
 import config
 import tableproc as tp
-from fdata import *
-from fit import *
+import numpy as np
+import fit
+import fdata
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{config.db_path}"
@@ -36,7 +36,7 @@ lll = len(Src.query.all())
 def srclist():
     data = db.engine.execute("SELECT * FROM Src where Status = 1;")
     Events = [i["Event"] for i in data]
-    mdtime = getmdtime(Events)
+    mdtime = fdata.getmdtime(Events)
     data = db.engine.execute("SELECT * FROM Src where Status = 1;")
     return render_template("srclist.html", data=data, tags=config.tags, mdtime=mdtime)
 
@@ -58,7 +58,7 @@ def query():
     print(query)
     data = db.engine.execute(sql)
     Events = [i["Event"] for i in data]
-    mdtime = getmdtime(Events)
+    mdtime = fdata.getmdtime(Events)
     data = db.engine.execute(sql)
     return render_template("table.html", data=data, mdtime=mdtime)
 
@@ -94,9 +94,9 @@ def src(Event, chartID="chart_ID"):
     next = Src.query.filter(Src.id.ilike(f"%{id_next}%"))[0].to_dict()["Event"]
     pageType = "graph"
     chart = {"renderTo": chartID, "zoomType": "xy", "height": "100%"}
-    series = getdata(event_name)
+    series = fdata.getdata(event_name)
     title = {"text": event_name}
-    pars, models = loadfit(event_name)
+    pars, models = fit.loadfit(event_name)
     tg = {i: 0 for i in config.tags}
     for i in config.tags:
         if i == "Ongoing":
@@ -130,9 +130,9 @@ def fitparm():
     t0 = 9750.0 if t0 == "None" else float(t0)
     tE = 50.0 if tE == "None" else float(tE)
     event_name = request.form.get("event_name")
-    fit_info = fit(event_name, u_0=u0, t_0=t0, t_E=tE, bl=int(bl))
+    fit_info = fit.fit(event_name, u_0=u0, t_0=t0, t_E=tE, bl=int(bl))
     print(u0, bl, t0, tE, fit_info)
-    pars, models = loadfit(event_name)
+    pars, models = fit.loadfit(event_name)
     return render_template("fitform.html", pars=pars, models=models, fit_info=fit_info)
 
 
