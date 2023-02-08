@@ -1,1 +1,1 @@
-SCRIPT_NAME='vlti' /home/ulens/anaconda3/envs/vlti/bin/gunicorn -c config.py app:app
+SCRIPT_NAME='vlti' gunicorn -c config.py app:app

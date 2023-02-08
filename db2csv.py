@@ -7,7 +7,7 @@ def loadcsv2db(fname, dbname):
     # fail if there exist old database
     try:
         engine = create_engine(f"sqlite:///{dbname}")
-    except:
+    except Exception:
         print("Can't create 'engine")
 
     df = pd.read_csv(fname)
@@ -20,7 +20,7 @@ def appendcsv2db(fname, dbname):
     # append fname.csv to dbname
     try:
         engine = create_engine(f"sqlite:///{dbname}")
-    except:
+    except Exception:
         print("Can't create engine")
 
     df = pd.read_csv(fname)

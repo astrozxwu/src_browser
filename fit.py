@@ -1,8 +1,11 @@
-import os, re, config
-import scipy.optimize as op
+import os
+import re
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
+import scipy.optimize as op
+
+import config
 
 PATH = config.data_path
 

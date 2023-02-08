@@ -1,12 +1,12 @@
 import json
 
+import numpy as np
 from flask import Flask, render_template, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 
 import config
-import tableproc as tp
-import numpy as np
 import fit
+import tableproc as tp
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{config.db_path}"
@@ -40,7 +40,7 @@ def srclist():
     return render_template(
         "srclist.html",
         data=data,
-        tags=config.key_tags + config.idle_tags,
+        tags=config.key_tags + list(config.map_tags.keys()) + config.idle_tags,
         mdtime=mdtime,
     )
 

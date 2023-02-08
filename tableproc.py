@@ -1,9 +1,13 @@
-from astroquery.vizier import Vizier
+import os
+
 import astropy.coordinates as coord
 import astropy.units as u
-from astropy.table import Table
-from astroquery.xmatch import XMatch
 import numpy as np
+from astropy.table import Table
+from astroquery.vizier import Vizier
+from astroquery.xmatch import XMatch
+
+import config
 
 keys = [
     "Event",
@@ -229,7 +233,7 @@ def vert(ra, dec):
 def get_lb(ra_dec):
     cod = coord.SkyCoord(ra_dec, unit=(u.hourangle, u.deg), frame="icrs")
     l, b = cod.galactic.l / u.deg, cod.galactic.b / u.deg
-    return l, b
+    return l.value, b.value
 
 
 def get_K_est(I, A_I):
@@ -243,8 +247,8 @@ def format_table(tab, formatter):
         tab[i].info.format = formatter[i]
 
 
-def gen_row(row_tp, ra_dec):
-    row = row_tp.copy()
+def vlti_info(ra_dec):
+    row = {}
     gri = query_table(ra_dec, catalog="refcat2", radius="1s")
     if gri:
         row["gbase"] = gri[0]["gmag"]
@@ -274,4 +278,32 @@ def gen_row(row_tp, ra_dec):
     if G_AO:
         row["G_AO"] = G_AO[0]["Gmag"]
         row["r_AO"] = G_AO[0]["_r"] * 60
+    return row
+
+
+def gen_gaia_row(
+    name, rawcsv=os.path.join(config.data_path, "alerts.csv"), update_raw=False
+):
+    row = dict(zip(keys, dvalues))
+    if update_raw or not os.path.isfile(rawcsv):
+        os.system(f"wget http://gsaweb.ast.cam.ac.uk/alerts/alerts.csv -O {rawcsv}")
+    df_Gaia = Table.read(rawcsv, format="csv")
+    df_Gaia = df_Gaia[df_Gaia["#Name"] == name]
+    gaia = df_Gaia.to_pandas().to_dict(orient="records")[0]
+    RA, Dec = vert(gaia["RaDeg"], gaia["DecDeg"])
+    l, b = get_lb(RA + " " + Dec)
+    keep = {
+        "#Name": "Event",
+        "Published": "PubDate",
+        "TNSid": "TNS",
+        "Comment": "Comment",
+    }
+    gaia = {keep[i]: gaia[i] for i in keep.keys()}
+    gaia["RA"] = RA
+    gaia["Dec"] = Dec
+    gaia["l"] = l
+    gaia["b"] = b
+    vlti = vlti_info(RA + " " + Dec)
+    row.update(gaia)
+    row.update(vlti)
     return row
