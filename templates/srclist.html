@@ -105,7 +105,7 @@
         var julday = Math.floor((today.valueOf() / (1000 * 60 * 60 * 24)) - 0.5) + 2440588;
     </script>
     <div style="text-align: center;">
-        <h1 class="title">src-broswer &nbsp;&nbsp; today:
+        <h1 class="title">vlti-broswer &nbsp;&nbsp; JD:
             <script type="text/javascript">
                 document.write(julday)
             </script>
@@ -115,7 +115,7 @@
         <h2 class="title">(interactive model fitting & sql filtering)</h2>
     </div>
 
-    <div style="text-align: left;">
+    <div style="text-align:vlti left;">
         <p><b>UT_wide: </b>number of FT stars with G_FT &#60; 15 and K_FT &#60; 11</p>
         <p><b>AT_wide: </b>number of FT stars with G_FT &#60; 13 and K_FT &#60; 9</p>
     </div>
@@ -137,29 +137,31 @@
                                 url: './query',
                                 data: {
                                     {% if t == 'Ongoing' %}
-                                        query: "Status > 0",
-                                    {% else %}
+                        query: "Status > 0",
+                                    {% elif t == 'Visible' %}
+                        query: "Tags like Visible",
+                            {% else %}
                                         query: "{{ t }} > 0",
-                                    {% endif %}
-                                    indexes: JSON.stringify(ids),
+                        {% endif %}
+                        indexes: JSON.stringify(ids),
                                 },
-                                success: function (response) {
-                                    $("#table_wrapper").html(response);
-                                },
+                        success: function (response) {
+                            $("#table_wrapper").html(response);
+                        },
                             })
                         } else {
-                            $.ajax({
-                                type: 'POST',
-                                url: './query',
-                                data: {
-                                    query: "",
-                                    indexes: "",
-                                },
-                                success: function (response) {
-                                    $("#table_wrapper").html(response);
-                                },
-                            })
-                        }
+                        $.ajax({
+                            type: 'POST',
+                            url: './query',
+                            data: {
+                                query: "",
+                                indexes: "",
+                            },
+                            success: function (response) {
+                                $("#table_wrapper").html(response);
+                            },
+                        })
+                    }
                     });
                 </script>
                 {% endfor %}
@@ -198,24 +200,24 @@
                         }
                     });
                 </script>
-                    <td style="padding-top: 0;padding-bottom: 0">
-                        <button id='all' style="width:100%;height:80%;margin:0;padding: 0;font: inherit !important;"
-                            type="submit">show all
-                        </button>
-                    </td>
+                <td style="padding-top: 0;padding-bottom: 0">
+                    <button id='all' style="width:100%;height:80%;margin:0;padding: 0;font: inherit !important;"
+                        type="submit">show all
+                    </button>
+                </td>
                 <script>
                     $(document).on('click', '#all', function (e) {
-                            $.ajax({
-                                type: 'POST',
-                                url: './query',
-                                data: {
-                                    query: "",
-                                    indexes: "",
-                                },
-                                success: function (response) {
-                                    $("#table_wrapper").html(response);
-                                },
-                            })
+                        $.ajax({
+                            type: 'POST',
+                            url: './query',
+                            data: {
+                                query: "",
+                                indexes: "",
+                            },
+                            success: function (response) {
+                                $("#table_wrapper").html(response);
+                            },
+                        })
                     });
                 </script>
 
@@ -224,14 +226,46 @@
                         <input style="text-align:center;height: 70%;width:100%;padding: 0 !important;font: inherit !important;
 " placeholder="sql query here..." id="query" name="query" />
                     </td>
-                    <td style="width: 20%;padding-top: 0;padding-bottom: 0">
+                    <td style="width: 10%;padding-top: 0;padding-bottom: 0">
                         <button style="width:100%;height:70%;margin:0;padding: 0;font: inherit !important;"
                             type="submit">
                             query
                         </button>
                     </td>
                 </form>
-
+                <td style="width: 10%;padding-top: 0;padding-bottom: 0">
+                    <button style="width:100%;height:70%;margin:0;padding: 0;font: inherit !important;" type='submit'
+                        id="download">
+                        download
+                    </button>
+                </td>
+                <script>
+                    const saveData = (function () {
+                        const a = document.createElement("a");
+                        document.body.appendChild(a);
+                        a.style = "display: none";
+                        return function (data, fileName) {
+                            const blob = new Blob([data], {type: "octet/stream"}),
+                                url = window.URL.createObjectURL(blob);
+                            a.href = url;
+                            a.download = fileName;
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                        };
+                    }());
+                    $(document).on('click', '#download', function (e) {
+                        $.ajax({
+                            type: 'POST',
+                            url: './download',
+                            data: {
+                                indexes: JSON.stringify(ids),
+                            },
+                            success: function (response) {
+                                saveData(response, "event.csv");
+                            },
+                        })
+                    });
+                </script>
 
             </tr>
         </table>

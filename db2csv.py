@@ -1,3 +1,5 @@
+from operator import index
+from pickle import load
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -42,6 +44,7 @@ def db2csv(fname, dbname):
     with engine.begin() as connection:
         sql_query = pd.read_sql_query("select * from src", connection)
     df = pd.DataFrame(sql_query)
+    df.set_index('id', inplace=True)
     df.to_csv(fname, index=False)
 
 
@@ -55,3 +58,6 @@ def update(picker_key, picker_list, key, value_list, dbname):
             connection.execute(
                 f"UPDATE Src SET {key} = {value} WHERE {picker_key}= '{picker}' "
             )
+
+
+# loadcsv2db('./data/out.csv','./data/test.sqlite')

@@ -15,4 +15,4 @@ src_path = os.path.join(basedir, "./")
 db_path = os.path.join(basedir, "./data/db.sqlite")
 key_tags = ["AT", "UT", "AT_wide", "UT_wide"]
 map_tags = {"Ongoing": "Status"}
-idle_tags = []
+idle_tags = ["Visible"]

@@ -146,6 +146,7 @@
         align-items: center;
         overflow: hidden
     }
+
     .fill img {
         flex-shrink: 0;
         min-width: 100%;
@@ -304,12 +305,62 @@
             </table>
         </div>
         <div>
-        <img  style='height: 100%; width: 100%; object-fit: contain' src="../data/{{ src.Event }}/{{ src.Event }}_LC.png">
+            <img style='height: 100%; width: 100%; object-fit: contain'
+                src="../data/{{ src.Event }}/{{ src.Event }}_LC.png">
         </div>
+        <div>
+            <a herf=# id="renew_vis"><img style='height: 100%; width: 100%; object-fit: contain'
+                    src="../data/{{ src.Event }}/vis.png"></a>
+        </div>
+        <script>
+            $(document).on('click', 'a#renew_vis', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '../renew_vis',
+                    data: {
+                        event_name: "{{ src.Event }}",
+                        RA: "{{ src.RA }}",
+                        Dec: "{{ src.Dec }}",
+                        pk: "{{ src.id  }}"
+                    },
+                    success: function (response) {
+                        $("a#renew_vis").html(response);
+                    },
+                })
+            });
+        </script>
+        <div>
+            <button style="width:100%;height:100%;font: inherit !important;" type="submit" id="vlti_vis">vlti visibility
+            </button>
+            <p id='vlti_show'></p>
+        </div>
+        <script>
+            $(document).on('click', '#vlti_vis', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '../vlti_vis',
+                    data: {
+                        event_name: "{{ src.Event }}",
+                        RA: "{{ src.RA }}",
+                        Dec: "{{ src.Dec }}",
+                    },
+                })
+            });
+        </script>
+        <div id="vlti_wrapper" class="dataTables_wrapper no-footer">
+            {% include 'vlti_vis.html' %}
+        </div>
+
+
+
+
     </div>
     <div id="rightpanel" style="width: 49%; float: right;background-color: #EEE">
         <div style="padding:10px;">
-            <div id='tt' style="font-size:20px; font-weight:bold; background-color:{{ " lawngreen" if src.Status == 1 }};">
+            <div id='tt' style="font-size:20px; font-weight:bold; background-color:{{ " lawngreen" if src.Status==1
+                }};">
                 Status ({{ "active" if src.Status == 1 else "inactive" }})
             </div>
 
@@ -336,7 +387,7 @@
                         </tr>
                         <tr>
                             <td>l&nbsp;&nbsp;b</td>
-                                {% set l,b = lb(src.RA,src.Dec) %}
+                            {% set l,b = lb(src.RA,src.Dec) %}
                             <td>{{ "%.5f"|format(l|float) }}&nbsp;&nbsp;{{ "%.5f"|format(b|float) }}</td>
                         </tr>
                         <tr>
@@ -370,11 +421,13 @@
                         </tr>
                         <tr>
                             <td>Kbase</td>
-                            <td><span data-name="Kmag" class="Kmag" data-type="text" data-pk="{{ src.id }}">{{ "%.2f"|format(src.Kmag|float) }}</td>
+                            <td><span data-name="Kmag" class="Kmag" data-type="text" data-pk="{{ src.id }}">{{
+                                    "%.2f"|format(src.Kmag|float) }}</td>
                         </tr>
                         <tr>
                             <td>r_K</td>
-                            <td><span data-name="r_K" class="r_K" data-type="text" data-pk="{{ src.id }}">{{ "%.2f"|format(src.r_K|float) }}</td>
+                            <td><span data-name="r_K" class="r_K" data-type="text" data-pk="{{ src.id }}">{{
+                                    "%.2f"|format(src.r_K|float) }}</td>
                         </tr>
                         <tr>
                             <td>Gbase</td>
@@ -435,36 +488,40 @@
             </div>
         </div>
         <div>
-        <img style='height: 100%; width: 100%; object-fit: contain' src="../data/{{ src.Event }}/{{ src.Event }}_HR.png">
+            <img style='height: 100%; width: 100%; object-fit: contain'
+                src="../data/{{ src.Event }}/{{ src.Event }}_HR.png">
         </div>
         <div>
-        <img style='height: 100%; width: 100%; object-fit: contain' src="../data/{{ src.Event }}/{{ src.Event }}_HRcorr.png">
+            <img style='height: 100%; width: 100%; object-fit: contain'
+                src="../data/{{ src.Event }}/{{ src.Event }}_HRcorr.png">
         </div>
-        <div> 
-        <input id="2MASS" type="radio" name="survey" value="P/2MASS/color" checked><label for="2MASS">2MASS<label>
-        <input id="dec" type="radio" name="survey" value="P/DECaPS/DR1/color"><label for="dec">DECAM<label>
-        <input id="ps" type="radio" name="survey" value="P/PanSTARRS/DR1/color/z/zg/g"><label for="ps">PS1<label>
+        <div>
+            <input id="2MASS" type="radio" name="survey" value="P/2MASS/color" checked><label for="2MASS">2MASS<label>
+                    <input id="dec" type="radio" name="survey" value="P/DECaPS/DR1/color"><label for="dec">DECAM<label>
+                            <input id="ps" type="radio" name="survey" value="P/PanSTARRS/DR1/color/z/zg/g"><label
+                                for="ps">PS1<label>
         </div>
-        <div class='absolute-center'> 
-        <div id="aladin-lite-div" style="width:600px ;height:600px ;"></div>
-        <script type="text/javascript" src="https://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script>
-        <script type="text/javascript">
-            var aladin = A.aladin('#aladin-lite-div', {survey: "P/2MASS/color", fov:0.1, target: "{{src.RA}} {{src.Dec}}"});
-            var ss = A.marker({{ ra }} , {{ dec }} , {popupTitle: "{{ src.Event }}"  });
-            var markerLayer = A.catalog();
-            var overlay = A.graphicOverlay({lineWidth: 1});
-            aladin.addOverlay(overlay);
-            overlay.add(A.circle({{ ra }}, {{ dec }}, 0.00833333, {color: 'lime',lineWidth: 3})); // radius in degrees
-            overlay.add(A.circle({{ ra }}, {{ dec }}, 0.01666667, {color: 'lime',lineWidth: 3})); // radius in degrees
-            aladin.addCatalog(markerLayer);
-            markerLayer.addSources([ss]);
-            $('input[name=survey]').change(function() {
-                aladin.setImageSurvey($(this).val());
-            });
+        <div class='absolute-center'>
+            <div id="aladin-lite-div" style="width:600px ;height:600px ;"></div>
+            <script type="text/javascript" src="https://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js"
+                charset="utf-8"></script>
+            <script type="text/javascript">
+                var aladin = A.aladin('#aladin-lite-div', {survey: "P/2MASS/color", fov: 0.1, target: "{{src.RA}} {{src.Dec}}"});
+                var ss = A.marker({{ra}} , {{ dec }} , {popupTitle: "{{ src.Event }}"});
+                var markerLayer = A.catalog();
+                var overlay = A.graphicOverlay({lineWidth: 1});
+                aladin.addOverlay(overlay);
+                overlay.add(A.circle({{ra}}, {{dec}}, 0.00833333, {color: 'lime', lineWidth: 3})); // radius in degrees
+                overlay.add(A.circle({{ra}}, {{dec}}, 0.01666667, {color: 'lime', lineWidth: 3})); // radius in degrees
+                aladin.addCatalog(markerLayer);
+                markerLayer.addSources([ss]);
+                $('input[name=survey]').change(function () {
+                    aladin.setImageSurvey($(this).val());
+                });
 
-        </script>
+            </script>
         </div>
-        </div>
+    </div>
 
 </body>
 

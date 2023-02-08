@@ -1,12 +1,16 @@
 import json
+import os
 
 import numpy as np
-from flask import Flask, render_template, request, send_from_directory
+import pandas as pd
+from flask import (Flask, Response, make_response, render_template, request,
+                   send_from_directory)
 from flask_sqlalchemy import SQLAlchemy
 
 import config
 import fit
 import tableproc as tp
+import vis
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{config.db_path}"
@@ -43,6 +47,25 @@ def srclist():
         tags=config.key_tags + list(config.map_tags.keys()) + config.idle_tags,
         mdtime=mdtime,
     )
+
+
+@app.route("/download", methods=["POST"])
+def download():
+    sql = "SELECT * FROM Src"
+    idx = request.form["indexes"][1:-1]
+    if idx:
+        sql += f" WHERE ID IN ({idx})"
+    data = db.engine.execute(sql)
+    df = pd.DataFrame(data, columns=["id"] + tp.keys)[tp.keys].to_csv(index=False)
+    # resp = make_response(df)
+    # cd = "attachment; filename=mycsv.csv"
+    # resp.headers["Content-Disposition"] = cd
+    # resp.headers["Cache-Control"] = "must-revalidate"
+    # resp.headers["Pragma"] = "must-revalidate"
+    # resp.headers["Content-type"] = "application/csv"
+    # resp.mimetype = "text/csv"
+    # return resp
+    return Response(df, mimetype="text/csv")
 
 
 @app.route("/query", methods=["POST"])
@@ -93,7 +116,7 @@ def src(Event, chartID="chart_ID"):
     event_name = x["Event"]
     id = x["id"]
     id_prev = id - 1 * (id is not 0)
-    id_next = id + 1 * (id is not lll - 1)
+    id_next = id + 1 * (id is not (lll - 1))
     prev = Src.query.filter(Src.id.ilike(f"%{id_prev}%"))[0].to_dict()["Event"]
     next = Src.query.filter(Src.id.ilike(f"%{id_next}%"))[0].to_dict()["Event"]
     pageType = "graph"
@@ -102,9 +125,10 @@ def src(Event, chartID="chart_ID"):
     title = {"text": event_name}
     pars, models = fit.loadfit(event_name)
     key_tg = {i: 1 * (x[i] > 0) for i in config.key_tags}
-    idle_tg = {i: 1 * (i in x["tags"]) for i in config.idle_tags}
+    idle_tg = {i: 1 * (i in x["Tags"]) for i in config.idle_tags}
     map_tg = {i: 1 * (x[config.map_tags[i]] > 0) for i in config.map_tags.keys()}
     tg = {**key_tg, **idle_tg, **map_tg}
+    v = vis.load_vlti_vis(os.path.join(config.data_path, event_name, 'vlti_vis.csv'))
     return render_template(
         "src.html",
         pageType=pageType,
@@ -119,7 +143,50 @@ def src(Event, chartID="chart_ID"):
         tags=tg,
         prev=prev,
         next=next,
+        vlti_vis=v
     )
+
+
+@app.route("/renew_vis", methods=["POST"])
+def renew_vis():
+    event = str(request.form.get("event_name"))
+    RA = str(request.form.get("RA"))
+    Dec = str(request.form.get("Dec"))
+    ra_dec = RA + " " + Dec
+    output = os.path.join(config.data_path, event, "vis.png")
+    _, v = vis.gen_vis_fig(ra_dec, output=output)
+    pk = request.form.get("pk")
+    query = Src.query.filter(Src.id.ilike(f"%{pk}%"))
+    x = query[0].to_dict()["Tags"]
+    print(x)
+    if v and "Visible;" not in x:
+        x += "Visible;"
+        db.engine.execute(
+            "UPDATE Src SET {} = '{}' WHERE id = {} ".format("Tags", x, pk)
+        )
+    elif not v and "Visible;" in x:
+        x.replace("Visible;", "")
+        db.engine.execute(
+            "UPDATE Src SET {} = '{}' WHERE id = {} ".format("Tags", x, pk)
+        )
+
+    return f"""<img style='height: 100%; width: 100%; object-fit: contain'
+    src="../data/{event}/vis.png">"""
+
+
+@app.route("/vlti_vis", methods=["POST"])
+def vlti_vis():
+    event = str(request.form.get("event_name"))
+    RA = str(request.form.get("RA"))
+    Dec = str(request.form.get("Dec"))
+    ra_dec = RA + " " + Dec
+    output = os.path.join(config.data_path, event, "vlti_vis.csv")
+    v = vis.vlti_vis(ra_dec, output=output)
+    v = vis.gen_vis_fig(ra_dec, output=output)
+    return render_template("vlti_vis.html", vlti_vis = v) 
+
+
+
 
 
 @app.route("/fitparm", methods=["POST"])
